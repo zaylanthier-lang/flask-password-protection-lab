@@ -10,22 +10,28 @@ class User(db.Model):
     username = db.Column(db.String)
     _password_hash = db.Column(db.String)
 
-    # Build method to protect password_hash property
+ 
+    # Protect password hash from being viewed
     @hybrid_property
     def password_hash(self):
-        pass
+        raise Exception('Password hashes may not be viewed.')
 
-    # Build method to set password hash property using bcrypt.generate_password_hash()
+    # Hash and store the password
     @password_hash.setter
     def password_hash(self, password):
-        pass
+        password_hash = bcrypt.generate_password_hash(password.encode('utf-8'))
+        self._password_hash = password_hash.decode('utf-8')
 
-    # Build authenticate method that uses bcrypt.check_password_hash()
+    # Check if password is correct
     def authenticate(self, password):
-        pass
+        return bcrypt.check_password_hash(
+            self._password_hash,
+            password.encode('utf-8')
+        )
 
     def __repr__(self):
         return f'User {self.username}, ID: {self.id}'
+
 
 class UserSchema(Schema):
     id = fields.Int()
